@@ -2,9 +2,10 @@
 <%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
 <%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
 <%@ taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@taglib prefix="e" uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" %>
 <logic:messagesPresent>
   <html:messages id="msg">
-    <span class="message">${msg}</span><br />
+    <span class="message"><e:forHtml value="${msg}" /></span><br />
   </html:messages>
 </logic:messagesPresent>
 <html:form action="/login">

@@ -48,25 +48,24 @@ public class RegisterAction extends Action implements IWithDataSource {
         errors.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage("error.rptpass.nomatch"));
       }
     }
-    
+
     Connection conn = null;
     try {
       conn = dataSource.getConnection();
-      Statement stmt = conn.createStatement();
-      ResultSet rs = stmt.executeQuery("SELECT COUNT(*) USERCNT "
-          + "FROM TUNEUSER "
-          + "WHERE USERNAME = '"
-          + daf.getString("username")
-          + "'");
+      String sql = ("SELECT COUNT(*) USERCNT "
+          + "FROM TUNEUSER WHERE USERNAME = ?");
+          PreparedStatement ps = conn.perpareStatement(sql);
+          ps.setString(1, daf.getString("username"));
+          ResultSet rs = ps.executeQuery();
       rs.next();
       if (rs.getInt("USERCNT") > 0) {
         errors.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage("error.user.exists"));
       } else if (errors.isEmpty()) {
-        stmt.executeUpdate("INSERT INTO TUNEUSER (USERNAME,PASSWORD,BALANCE) VALUES ('"
-            + daf.getString("username")
-            + "','"
-            + daf.getString("password")
-            + "',0.00)");
+        sql = ("INSERT INTO TUNEUSER (USERNAME,PASSWORD,BALANCE) VALUES (?,?,0.00)");
+        ps = conn.prepareStatement(sql);
+        ps.setString(1, daf.getString("username"));
+        ps.setString(2, daf.getString("password"));
+        ps.executeQuery();
         ActionMessages msgs = getMessages(request);
         msgs.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage("user.added"));
         forward = mapping.findForward("success");

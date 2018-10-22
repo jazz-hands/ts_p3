@@ -2,13 +2,14 @@ package com.tunestore.action;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.PreparedStatement;
 import java.util.Random;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
+import javax.sql.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,16 +46,13 @@ public class LoginAction extends Action implements IWithDataSource {
     try {
       conn = dataSource.getConnection();
       String sql = "SELECT USERNAME, PASSWORD, BALANCE FROM TUNEUSER"
-        + " WHERE TUNEUSER.USERNAME = '"
-        + ?
-        + "' AND PASSWORD = '"
-        + ?
-        + "'";
-      PreparedStatement ps = conn.preparedStatement(sql);
+        + " WHERE TUNEUSER.USERNAME = ?"
+        + " AND PASSWORD = ?";
+      PreparedStatement ps = conn.prepareStatement(sql);
       ps.setString(1, login);
       ps.setString(2, password);
-      stmt.setMaxRows(1);
-      ResultSet rs = ps.executeQuery(sql);
+      ps.setMaxRows(1);
+      ResultSet rs = ps.executeQuery();
       if (rs.next()) {
         messages.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage("login.successful"));
         request.getSession(true).setAttribute("USERNAME", rs.getString("USERNAME"));
@@ -75,7 +73,7 @@ public class LoginAction extends Action implements IWithDataSource {
           ps.setString(1, token.toString());
           ps.setString(2, ((String)request.getSession(true).getAttribute("USERNAME")));
           log.info(sql);
-          ps.executeUpdate(sql);
+          ps.executeUpdate();
 
           // Set the cookie
           Cookie logincookie = new Cookie("persistenttoken",token.toString());

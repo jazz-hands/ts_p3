@@ -1,12 +1,13 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib prefix="e" uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" %>
 <c:if test="${empty comments}">
 Peope haven't said anything
 </c:if>
 <c:forEach items="${comments}" var="comment">
 <div class="comment">
-<strong><c:out value="${comment.leftby}" escapeXml="false" /></strong> says:
+<strong><e:forHtml value="${comment.leftby}"/></strong> says:
 <blockquote>
-<c:out value="${comment.comment}" escapeXml="false" />
+<e:forHtml value="${comment.comment}"/>
 </blockquote>
 </div>
 </c:forEach>

@@ -24,13 +24,13 @@ import com.tunestore.util.IWithDataSource;
 
 public class LoginAction extends Action implements IWithDataSource {
   private DataSource dataSource;
-  
+
   private static Log log = LogFactory.getLog(LoginAction.class);
-  
+
   public void setDataSource(DataSource dataSource) {
     this.dataSource = dataSource;
   }
-  
+
   public ActionForward execute(ActionMapping mapping, ActionForm form,
       HttpServletRequest request, HttpServletResponse response)
       throws Exception {
@@ -40,26 +40,28 @@ public class LoginAction extends Action implements IWithDataSource {
     Boolean stayLogged = df.get("stayLogged") == null ? new Boolean(false) : (Boolean)df.get("stayLogged");
     ActionMessages errors = getErrors(request);
     ActionMessages messages = getMessages(request);
-    
+
     Connection conn = null;
     try {
       conn = dataSource.getConnection();
       String sql = "SELECT USERNAME, PASSWORD, BALANCE FROM TUNEUSER"
         + " WHERE TUNEUSER.USERNAME = '"
-        + login
+        + ?
         + "' AND PASSWORD = '"
-        + password
+        + ?
         + "'";
-      Statement stmt = conn.createStatement();
+      PreparedStatement ps = conn.preparedStatement(sql);
+      ps.setString(1, login);
+      ps.setString(2, password);
       stmt.setMaxRows(1);
-      ResultSet rs = stmt.executeQuery(sql);
+      ResultSet rs = ps.executeQuery(sql);
       if (rs.next()) {
         messages.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage("login.successful"));
         request.getSession(true).setAttribute("USERNAME", rs.getString("USERNAME"));
         request.getSession(true).setAttribute("BALANCE", rs.getString("BALANCE"));
         request.setAttribute("msg", "Logged in successfully");
-        
-        // See if they wanted to stay logged in 
+
+        // See if they wanted to stay logged in
         if (stayLogged.booleanValue()) {
           log.info("User requesting to stay logged in");
           String chooseFrom = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/+=`~!@#$%^&*()-_{}[]|";
@@ -69,13 +71,12 @@ public class LoginAction extends Action implements IWithDataSource {
             token.append(chooseFrom.charAt(rnd.nextInt(chooseFrom.length())));
           }
           sql = "INSERT INTO PERSISTENTLOGIN (TOKEN,TUNEUSER) VALUES ('"
-            + token.toString()
-            + "','"
-            + request.getSession(true).getAttribute("USERNAME")
-            + "')";
+            + "?" + "','" + "?" + "')";
+          ps.setString(1, token.toString());
+          ps.setString(2, ((String)request.getSession(true).getAttribute("USERNAME")));
           log.info(sql);
-          stmt.executeUpdate(sql);
-          
+          ps.executeUpdate(sql);
+
           // Set the cookie
           Cookie logincookie = new Cookie("persistenttoken",token.toString());
           logincookie.setMaxAge(60*60*24*365);
@@ -92,7 +93,7 @@ public class LoginAction extends Action implements IWithDataSource {
         try {conn.close();} catch (Exception e) {}
       }
     }
-    
+
     saveMessages(request, messages);
     saveErrors(request, errors);
     return mapping.findForward("index");

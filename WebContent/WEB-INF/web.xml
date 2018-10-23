@@ -8,7 +8,7 @@
   <listener>
     <listener-class>com.tunestore.servlet.DerbyStartupListener</listener-class>
   </listener>
-  
+
   <listener>
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
   </listener>
@@ -17,10 +17,25 @@
     <filter-name>PersistenceFilter</filter-name>
     <filter-class>com.tunestore.servlet.PersistenceFilter</filter-class>
   </filter>
+  <filter>
+  	<description>
+  	</description>
+  	<display-name>ClickjackingPreventionFilter</display-name>
+  	<filter-name>ClickjackingPreventionFilter</filter-name>
+  	<filter-class>com.tunestore.servlet.ClickjackingPreventionFilter</filter-class>
+  	<init-param>
+            <param-name>mode</param-name>
+            <param-value>DENY</param-value>
+    </init-param>
+  </filter>
 
   <filter-mapping>
     <filter-name>PersistenceFilter</filter-name>
     <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+  	<filter-name>ClickjackingPreventionFilter</filter-name>
+  	<url-pattern>/*</url-pattern>
   </filter-mapping>
 
   <servlet>
@@ -37,7 +52,7 @@
     </init-param>
     <load-on-startup>2</load-on-startup>
   </servlet>
-  
+
   <servlet-mapping>
   	<servlet-name>ActionServlet</servlet-name>
   	<url-pattern>*.do</url-pattern>
@@ -46,12 +61,12 @@
   <welcome-file-list>
     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
-  
+
   <error-page>
     <error-code>500</error-code>
     <location>/error.jsp</location>
   </error-page>
-  
+
   <error-page>
     <exception-type>java.lang.Throwable</exception-type>
     <location>/error.jsp</location>

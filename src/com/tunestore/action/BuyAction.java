@@ -44,6 +44,10 @@ public class BuyAction extends Action implements IWithDataSource {
       errors.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage("buy.login"));
       saveErrors(request, errors);
       return retval;
+    } else if (!request.getSession().getAttribute("buyToken").equals(request.getParameter("buyToken"))) {
+    	errors.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage("xsrf.badRequest"));
+        saveErrors(request, errors);
+        return retval;
     }
 
     try {

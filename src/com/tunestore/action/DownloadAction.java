@@ -54,22 +54,19 @@ public class DownloadAction extends Action {
           return mapping.findForward("error");
       }
     //Check if the user actually bought the CD!
-    ///need to check the values
-    String msg = "";
     try {
         log.info("Getting CD's");
         List results = DBUtil.getCDsForUser((String)request.getSession(true).getAttribute("USERNAME"), (String)request.getSession(true).getAttribute("USERNAME"));
         boolean owned = false;
         for(int i=0; i<results.size(); i++) {
         	CD cd = (CD)results.get(i);
-        	msg=request.getParameter("cd");
         	if(cd.getBits().equals(request.getParameter("cd"))) {
         		owned=true;
         		break;
         	}
         }
         if(owned==false) {
-        	errors.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage(msg));
+        	errors.add(ActionMessages.GLOBAL_MESSAGE, new ActionMessage("stealing"));
             saveErrors(request, errors);
             return mapping.findForward("error");
         }
